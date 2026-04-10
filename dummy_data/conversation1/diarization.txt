@@ -1,0 +1,4 @@
+[0.3s - 2.2s] SPEAKER_02
+[3.2s - 5.4s] SPEAKER_01
+[6.7s - 8.9s] SPEAKER_02
+[9.6s - 12.7s] SPEAKER_00
