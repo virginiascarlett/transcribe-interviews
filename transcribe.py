@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import time
+from pathlib import Path
 from tqdm import tqdm
 from dotenv import load_dotenv
 import whisper
@@ -21,22 +22,24 @@ model = whisper.load_model("tiny")
 load_dotenv()
 DATA_DIR = os.getenv("DATA_DIR")
 
-# Get command line args
-args = utils.get_args()
-DATA_SUBDIR = args.data_subdir
-
-# Create a list of file names to process
-data_files = utils.get_files(DATA_DIR, DATA_SUBDIR, "mp4")
+data_path = Path(DATA_DIR) / utils.get_args().data_subdir
+# Create a list of Path objects
+data_files = sorted(data_path.glob("*.mp4"))
 
 progress_bar = tqdm(data_files)
 for counter, data_file in enumerate(progress_bar):
-    out_path = os.path.join(DATA_DIR, DATA_SUBDIR, f"transcript{counter}.txt")
+    out_dir = data_path / "transcripts"
+    out_path = out_dir / f"transcript{counter}.txt"
+    # parents=True creates any missing parent directories in the path
+    # exist_ok=True means don't overwrite the folder if it's already there
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     progress_bar.set_description(f"Processing {data_file}")
 
     # verbose=False to suppress progress output since we are using tqdm
     # fp16=False, to suppress an annoying warning after it tries and fails to use fp16
     # language=en prevents guessing and suppresses the "language detected" message
-    result = model.transcribe(data_file, fp16=False, verbose=False, language="en")
+    result = model.transcribe(str(data_file), fp16=False, verbose=False, language="en")
 
     with open(out_path, "w") as outF:
         for segment in result["segments"]:

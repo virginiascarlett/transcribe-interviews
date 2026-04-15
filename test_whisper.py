@@ -2,7 +2,7 @@
 import whisper
 
 model = whisper.load_model("base")
-result = model.transcribe("dummy_data/conversation1/test_speech.mp3")
+result = model.transcribe("dummy_data/conversation1/single_speaker.mp3")
 
 # To generate the transcript without time stamps:
 # outF = open('dummy_data/conversation1/transcript1.txt', 'w')

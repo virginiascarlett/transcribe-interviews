@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import time
+from pathlib import Path
 from tqdm import tqdm
 from dotenv import load_dotenv
 import warnings
@@ -16,12 +17,9 @@ load_dotenv()
 DATA_DIR = os.getenv("DATA_DIR")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Get command line args
-args = utils.get_args()
-DATA_SUBDIR = args.data_subdir
-
-# Create a list of file names to process
-data_files = utils.get_files(DATA_DIR, DATA_SUBDIR, "wav")
+data_path = Path(DATA_DIR) / utils.get_args().data_subdir
+# Create a list of Path objects
+data_files = sorted(data_path.glob("*.wav"))
 
 # Suppress warnings - I get a well-known "degrees of freedom is <= 0" that seems safe to ignore.
 warnings.filterwarnings("ignore", message=".*degrees of freedom is <= 0.*")
@@ -34,10 +32,15 @@ pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", token=HF
 
 progress_bar = tqdm(data_files)
 for counter, data_file in enumerate(progress_bar):
-    out_path = os.path.join(DATA_DIR, DATA_SUBDIR, f"diarization{counter}.txt")
+    out_dir = data_path / "diarizations"
+    out_path = out_dir / f"diarization{counter}.txt"
+    # parents=True creates any missing parent directories in the path
+    # exist_ok=True means don't overwrite the folder if it's already there
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     progress_bar.set_description(f"Processing {data_file}")
 
-    diarization = pipeline(data_file)
+    diarization = pipeline(str(data_file))
     annotation = diarization.speaker_diarization
     diarization_output = []
     for segment, track, speaker in annotation.itertracks(yield_label=True):

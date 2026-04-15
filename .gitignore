@@ -1,6 +1,7 @@
 # Custom entries
 data/
 .env
+**/.DS_Store
 
 # Python
 
