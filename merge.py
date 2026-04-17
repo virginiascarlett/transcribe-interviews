@@ -81,18 +81,13 @@ def merge_data(diarization, transcript):
     return results
 
 # Run the process
-progress_bar = tqdm(diarization_files)
-for i, diarization_file in enumerate(progress_bar):
-    progress_bar.set_description(f"Processing chunk {i}")
-    final_output = merge_data(diarization_file, transcript_files[i])
-    out_dir = data_path / "diarized_transcripts_raw"
-    out_path = out_dir / f"result{i}.txt"
-    # parents=True creates any missing parent directories in the path
-    # exist_ok=True means don't overwrite the folder if it's already there
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    with open(out_path, "w") as outF:
-        for res in final_output:
-            outF.write(f"{res}\n")
+results_list = utils.run_func_w_progbar(
+    merge_data, 
+    [diarization_files, transcript_files],
+    output_path=data_path,
+    output_subdir="diarized_transcripts_raw",
+    output_basename="merged",
+    output_extension="txt"
+)
 
 utils.report_time(start_time)

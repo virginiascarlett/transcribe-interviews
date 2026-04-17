@@ -14,9 +14,10 @@ start_time = time.perf_counter()
 # Get env variables
 load_dotenv()
 DATA_DIR = os.getenv("DATA_DIR")
+DATA_SUBDIR = os.getenv("DATA_SUBDIR")
 LITELLM_PROXY_API_KEY = os.getenv("LITELLM_PROXY_API_KEY")
 
-data_path = Path(DATA_DIR) / utils.get_args().data_subdir
+data_path = Path(DATA_DIR, DATA_SUBDIR)
 # Create a list of Path objects
 data_files = sorted((data_path / "diarized_transcripts_raw").glob("*.txt"))
 
@@ -70,19 +71,14 @@ def clean_data(data_file):
 
     return results
 
-
 # Run the process
-progress_bar = tqdm(data_files)
-for i, data_file in enumerate(progress_bar):
-    final_output = clean_data(data_file)
-    out_dir = data_path / "diarized_transcripts_clean"
-    out_path = out_dir / f"result{i}.txt"
-    # parents=True creates any missing parent directories in the path
-    # exist_ok=True means don't overwrite the folder if it's already there
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    with open(out_path, "w") as outF:
-        for res in final_output:
-            outF.write(f"{res}\n")
+results_list = utils.run_func_w_progbar(
+    clean_data, 
+    [[str(f) for f in data_files]],
+    output_path=data_path,
+    output_subdir="diarized_transcripts_clean",
+    output_basename="chunk",
+    output_extension="txt"
+)
 
 utils.report_time(start_time)
