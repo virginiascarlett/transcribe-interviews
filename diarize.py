@@ -15,15 +15,15 @@ start_time = time.perf_counter()
 # Get env variables
 load_dotenv()
 DATA_DIR = os.getenv("DATA_DIR")
+DATA_SUBDIR = os.getenv("DATA_SUBDIR")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-data_path = Path(DATA_DIR) / utils.get_args().data_subdir
+data_path = Path(DATA_DIR, DATA_SUBDIR)
 # Create a list of Path objects
 data_files = sorted(data_path.glob("*.wav"))
 
-# Suppress warnings - I get a well-known "degrees of freedom is <= 0" that seems safe to ignore.
+# Suppress warnings - I get a well-known "degrees of freedom is <= 0" warning that seems safe to ignore.
 warnings.filterwarnings("ignore", message=".*degrees of freedom is <= 0.*")
-
 
 # Because pyannote.audio uses gated models,
 # I had to create a Hugging Face account

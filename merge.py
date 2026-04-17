@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 import os
 from pathlib import Path
+from tqdm import tqdm
+import time
 from dotenv import load_dotenv
 import litellm
 from litellm import completion
 import utils
 
+# Start the clock - we'll report how long the script took to run
+start_time = time.perf_counter()
+
 # Get env variables
 load_dotenv()
 DATA_DIR = os.getenv("DATA_DIR")
+DATA_SUBDIR = os.getenv("DATA_SUBDIR")
 LITELLM_PROXY_API_KEY = os.getenv("LITELLM_PROXY_API_KEY")
 
-data_path = Path(DATA_DIR) / utils.get_args().data_subdir
+data_path = Path(DATA_DIR, DATA_SUBDIR)
 # Create a list of Path objects
 diarization_files = sorted((data_path/"diarizations").glob("*.txt"))
 transcript_files = sorted((data_path/"transcripts").glob("*.txt"))
@@ -75,8 +81,10 @@ def merge_data(diarization, transcript):
     return results
 
 # Run the process
-for i in range(len(diarization_files)):
-    final_output = merge_data(diarization_files[i], transcript_files[i])
+progress_bar = tqdm(diarization_files)
+for i, diarization_file in enumerate(progress_bar):
+    progress_bar.set_description(f"Processing chunk {i}")
+    final_output = merge_data(diarization_file, transcript_files[i])
     out_dir = data_path / "diarized_transcripts_raw"
     out_path = out_dir / f"result{i}.txt"
     # parents=True creates any missing parent directories in the path
@@ -84,5 +92,7 @@ for i in range(len(diarization_files)):
     out_dir.mkdir(parents=True, exist_ok=True)
 
     with open(out_path, "w") as outF:
-        for i, res in enumerate(final_output):
-            outF.write(f"\n--- Result {i+1} ---\n{res}")
+        for res in final_output:
+            outF.write(f"{res}\n")
+
+utils.report_time(start_time)

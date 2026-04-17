@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 import os
 from pathlib import Path
+from tqdm import tqdm
+import time
 from dotenv import load_dotenv
 import litellm
 from litellm import completion
 import utils
+
+# Start the clock - we'll report how long the script took to run
+start_time = time.perf_counter()
 
 # Get env variables
 load_dotenv()
@@ -67,8 +72,9 @@ def clean_data(data_file):
 
 
 # Run the process
-for i in range(len(data_files)):
-    final_output = clean_data(data_files[i])
+progress_bar = tqdm(data_files)
+for i, data_file in enumerate(progress_bar):
+    final_output = clean_data(data_file)
     out_dir = data_path / "diarized_transcripts_clean"
     out_path = out_dir / f"result{i}.txt"
     # parents=True creates any missing parent directories in the path
@@ -76,5 +82,7 @@ for i in range(len(data_files)):
     out_dir.mkdir(parents=True, exist_ok=True)
 
     with open(out_path, "w") as outF:
-        for i, res in enumerate(final_output):
-            outF.write(f"\n--- Result {i+1} ---\n{res}")
+        for res in final_output:
+            outF.write(f"{res}\n")
+
+utils.report_time(start_time)
