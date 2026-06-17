@@ -8,4 +8,4 @@ set -a
 source .env
 set +a
 
-ffmpeg -i $DATA_DIR/$DATA_SUBDIR/recording.mp4 -c copy -map 0 -segment_time 00:08:00 -f segment $DATA_DIR/$1/chunk%d.mp4
+ffmpeg -i $DATA_DIR/$DATA_SUBDIR/recording.mp4 -c copy -map 0 -segment_time 00:08:00 -f segment $DATA_DIR/$DATA_SUBDIR/chunk%d.mp4

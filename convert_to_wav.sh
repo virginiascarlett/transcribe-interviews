@@ -10,5 +10,5 @@ set +a
 for file in "$DATA_DIR"/$DATA_SUBDIR/chunk*.mp4; do
     # Extract filename without extension for the output
     filename=$(basename "$file" .mp4)
-    ffmpeg -i "$file" $DATA_DIR/$1/${filename}.wav
+    ffmpeg -i "$file" $DATA_DIR/$DATA_SUBDIR/${filename}.wav
 done

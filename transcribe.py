@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+This script transcribes audio from MP4 files using the Whisper
+model by OpenAI. It processes audio chunks of an interview
+recording and generates time-stamped transcripts.
+Run like so:
+./transcribe.py my_data_subdirectory
+"""
+
 import os
 import time
 from pathlib import Path
@@ -18,6 +26,7 @@ WHISPER_MODEL = os.getenv("WHISPER_MODEL")
 # I use tiny or base for testing and large-v3-turbo for production
 model = whisper.load_model(WHISPER_MODEL)
 
+
 def transcribe(data_file):
     # verbose=False to suppress progress output since we are using tqdm
     # fp16=False, to suppress an annoying warning after it tries and fails to use fp16
@@ -31,7 +40,7 @@ data_path = Path(DATA_DIR, DATA_SUBDIR)
 data_files = sorted(data_path.glob("*.mp4"))
 # Don't process the original recording. Only process chunks.
 data_files = [f for f in data_files if f.name != "recording.mp4"]
-if all(f.name.startswith('chunk') for f in data_files):
+if all(f.name.startswith("chunk") for f in data_files):
     pass
 else:
     raise ValueError("""
@@ -41,6 +50,7 @@ else:
                      and the chunks.
                      """)
 
+
 def save_transcription(out_file, result):
     with open(out_file, "w") as outF:
         for segment in result["segments"]:
@@ -49,15 +59,16 @@ def save_transcription(out_file, result):
             text = segment["text"].strip()
             outF.write(f"[{start:.2f}s - {end:.2f}s] {text}\n")
 
+
 # Do the work
 result_list = utils.run_func_w_progbar(
-    transcribe, 
+    transcribe,
     [[str(f) for f in data_files]],
     output_path=data_path,
     output_subdir="transcripts",
     output_basename="transcript",
     output_extension="txt",
-    save_func=save_transcription
+    save_func=save_transcription,
 )
 
 utils.report_time(start_time)
