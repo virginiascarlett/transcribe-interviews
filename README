@@ -58,22 +58,32 @@ source .venv/bin/activate
 ```bash
 DATA_DIR=my_data_dir
 DATA_SUBDIR=my_interview_subdir
-WHISPER_MODEL=tiny
+WHISPER_TEST_MODEL=tiny
+WHISPER_PROD_MODEL=large-v3-turbo
 HF_TOKEN=my_HF_token
-LITELLM_PROXY_API_KEY=my_LiteLLM_API_key
+LITELLM_API_KEY=my_litellm_key
+LITELLM_API_BASE=https://litellm.dreamlab.ucsb.edu
+LITELLM_TEST_MODEL=litellm_proxy/gemini-3-flash-preview
+LITELLM_PROD_MODEL=litellm_proxy/gemini-3.1-pro-preview-customtools
 ```
+
 If you want to test the pipeline, you can use these variables:
+
 ```bash
 DATA_DIR=dummy_data
 DATA_SUBDIR=conversation1
 ```
+
 I use the 'tiny' Whisper model for testing and 'large-v3-turbo' for production.
 Pyannote requires that you sign some forms on hugging face in order to get a
 token to use it--that's where the HF token comes from.
 
+The LiteLLM "API Gateway" for UCSB Library staff give us access to
+"gemini-3-flash-preview", "gemini-3.1-pro-preview", or
+"gemini-3.1-pro-preview-customtools". Flash is cheaper, pro is smarter.
+
 3. Place the Zoom `.mp4` recording into a new subdirectory under `data/`. Here,
    I call it `my_interview_subdir/`. Make sure this name is in the .env file.
-
 
 Next, you can either run the whole pipeline all at once like so:
 
@@ -81,7 +91,9 @@ Next, you can either run the whole pipeline all at once like so:
 ./run_pipeline.sh
 ```
 
-Or you can proceed with the step-by-step procedure below.
+Or you can proceed with the step-by-step procedure below. N.B. The above shell
+script has not been rigorously tested. In theory, it SHOULD resume at the
+correct step if you've already completed a portion of the pipeline.
 
 4. Rename the recording to `recording.mp4`.
 

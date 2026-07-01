@@ -193,7 +193,25 @@ else
     log "Final cleanup complete."
 fi
 
+# ── Step 7: Concatenate chunks ─────────────────────────────────────────────────────
+
+log "=== Step 7: Concatenate chunks (concat_final_results.sh) ==="
+
+if [[ "$final_count" -lt "$chunk_count" ]]; then
+    log "$final_count final transcript files for $chunk_count recording chunks. Aborting final concatenation because the final clean-up is incomplete."
+    exit 1
+elif [[ "$final_count" -eq "$chunk_count" ]]; then
+    log "Running concat_final_results.sh..."
+    ./concat_final_results.sh
+    log "Final concatenation complete."
+else
+    # In case final_count is somehow greater than chunk_count
+    log "Warning: Found $final_count final transcript files for $chunk_count recording chunks. Aborting final concatenation because the numbers should match."
+    ./concat_final_results.sh
+    log "Final concatenation complete."
+fi
+
 # ── Done ──────────────────────────────────────────────────────────────────────
 
 log "=== Pipeline complete! ==="
-log "Final transcripts are in: ${SUBDIR}/diarized_transcripts_clean_final/"
+log "Final transcript is: $DATA_DIR/$DATA_SUBDIR/final_transcript.txt"

@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import time
 from dotenv import load_dotenv
-import litellm
 from litellm import completion
 import utils
 
@@ -14,17 +13,13 @@ start_time = time.perf_counter()
 load_dotenv()
 DATA_DIR = os.getenv("DATA_DIR")
 DATA_SUBDIR = os.getenv("DATA_SUBDIR")
-LITELLM_PROXY_API_KEY = os.getenv("LITELLM_PROXY_API_KEY")
+LITELLM_API_KEY = os.getenv("LITELLM_API_KEY")
+LITELLM_API_BASE = os.getenv("LITELLM_API_BASE")
+LITELLM_PROD_MODEL = os.getenv("LITELLM_PROD_MODEL")
 
 data_path = Path(DATA_DIR, DATA_SUBDIR)
 # Create a list of Path objects
 files = sorted((data_path / "diarized_transcripts_clean").glob("*.txt"))
-
-litellm.api_base = "https://litellm.dreamlab.ucsb.edu"
-
-# Choose model (Flash is faster/cheaper, Pro is smarter)
-# "gemini-3-flash-preview", "gemini-3.1-pro-preview", or "gemini-3.1-pro-preview-customtools"
-MODEL_NAME = "litellm_proxy/gemini-3.1-pro-preview"
 
 INSTRUCTIONS = """
 You are a transcript clean-up service. Your job is to take raw
@@ -50,11 +45,13 @@ def merge_data(file):
 
     try:
         response = completion(
-            model=MODEL_NAME,
+            model=LITELLM_PROD_MODEL,
             messages=[
                 {"role": "system", "content": INSTRUCTIONS},
                 {"role": "user", "content": USER_DATA},
             ],
+            api_key=LITELLM_API_KEY,
+            api_base=LITELLM_API_BASE
         )
 
         # Extract the text answer
