@@ -4,6 +4,15 @@ This document provides instructions, constraints, and best practices for AI Codi
 
 ---
 
+## 📂 Key Files to Reference
+
+When working on this codebase, pay special attention to:
+* **`README`**: Located at the repository root. Contains detailed pipeline design, setup notes, and manual running steps. Make sure to update it if any core behaviors or pipeline steps change.
+* **`.env`**: Located at the repository root (ignored by git). This file defines the operational environment. Refer to the **Environment Specification** section below for required environment variables.
+* **`utils.py`**: Contains helper functions such as `run_func_w_progbar` and file path construction. Any modular or utility refactoring should be integrated here.
+
+---
+
 ## 🏗️ Repository Architecture & Workflow
 
 This project is a modular pipeline that converts Zoom interview recordings (MP4) into high-quality transcripts using OpenAI Whisper, Pyannote Speaker Diarization, and LiteLLM-based post-processing.
@@ -32,8 +41,20 @@ The project relies on a virtual environment named `.venv`.
 * System dependency: `ffmpeg` must be installed on the system to split and convert audio files.
 * Python dependencies are listed in `requirements.txt` (or installed in the `.venv` directory).
 
-### 3. Environment Variables (`.env`)
-A `.env` file must be present at the repository root. Ensure the following variables are configured correctly:
+### 3. Environment Variables & Specification (`.env`)
+The `.env` file specifies operational modes, directories, model sizes, and credentials. It is a critical runtime control file.
+
+The complete env specification includes:
+* `DATA_DIR`: Base directory for video/audio and transcription files (e.g., `dummy_data` or `data`).
+* `DATA_SUBDIR`: Subdirectory name for the current active interview (e.g., `conversation1` or `my_interview_subdir`).
+* `WHISPER_MODEL`: The Whisper transcription model size to load. Options include `tiny`, `base`, `small`, `medium`, `large-v3-turbo` (use `tiny` or `base` for local agent testing).
+* `HF_TOKEN`: Hugging Face User Access Token (needed for downloading the gated `pyannote/speaker-diarization-3.1` model).
+* `LITELLM_API_KEY`: The API key for the LiteLLM proxy or endpoint.
+* `LITELLM_API_BASE`: The base URL endpoint for LiteLLM completion service (e.g., `https://litellm.dreamlab.ucsb.edu`).
+* `LITELLM_TEST_MODEL`: The model name to use when testing (e.g., `litellm_proxy/gemini-3-flash-preview`).
+* `LITELLM_PROD_MODEL`: The model name to use in production (e.g., `litellm_proxy/gemini-3.1-pro-preview-customtools`).
+
+Example `.env` configuration:
 ```bash
 DATA_DIR=dummy_data
 DATA_SUBDIR=conversation1
