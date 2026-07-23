@@ -79,6 +79,31 @@ LITELLM_PROD_MODEL=litellm_proxy/gemini-3.1-pro-preview-customtools
 
 ---
 
+## 📢 Key Recommendations for Code Reusers
+
+If you are cloning or forking this repository to reuse it for your own transcription workflows, please observe the following requirements and recommendations:
+
+1. **Hugging Face Model Access (Diarization):**
+   * This project uses `pyannote/speaker-diarization-3.1` which is a **gated model**.
+   * You **must** create a Hugging Face account, visit the [model page](https://huggingface.co/pyannote/speaker-diarization-3.1), accept the terms of service, and generate a User Access Token with read permissions.
+   * Provide this token as `HF_TOKEN` in your `.env` file.
+
+2. **LiteLLM / API Provider Adaptation:**
+   * The default setup points to the UCSB DREAM Lab's LiteLLM proxy (`https://litellm.dreamlab.ucsb.edu`), which is restricted to UCSB library staff.
+   * **To reuse this code elsewhere:** Update `LITELLM_API_BASE` and `LITELLM_API_KEY` in `.env` to point to your own LiteLLM server, or adapt the python completion calls in `merge.py`, `cleanup.py`, and `final_cleanup.py` to call standard endpoints like OpenAI, Anthropic, or local Ollama instances directly.
+
+3. **Required System Utilities (`ffmpeg`):**
+   * Audio splitting and WAV conversions depend heavily on `ffmpeg`. You must install `ffmpeg` on your host operating system (e.g., via `brew install ffmpeg` on macOS, or `sudo apt install ffmpeg` on Ubuntu/Debian).
+
+4. **Resource Constraints and Hardware:**
+   * Diarization runs on PyTorch. If a GPU (CUDA or MPS/Apple Silicon) is available, Pyannote and Whisper will utilize it. On standard CPU-only machines, diarization of a 1-hour interview can take 30+ minutes.
+   * Ensure your system has sufficient RAM/VRAM if running larger Whisper models (such as `large-v3-turbo`).
+
+5. **File Naming & Directory Conventions:**
+   * The pipeline scripts are highly opinionated about file naming. Ensure your raw input recording is named exactly `recording.mp4` and is placed in the designated folder configured in `.env` (`DATA_DIR/DATA_SUBDIR/recording.mp4`) before executing `./run_pipeline.sh`.
+
+---
+
 ## 🔧 Target Areas for Development
 
 If you are tasked with enhancing this repository, prioritize the following features:
