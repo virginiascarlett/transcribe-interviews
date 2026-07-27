@@ -11,13 +11,13 @@ resume the process if it's interrupted, and it's dependent on LiteLLM as your
 API gateway. This pipeline is a very bespoke thing made for my immediate
 purposes, but I'm slowly working to make it more generically useful.
 
-## Misc notes
+## Important notes
 
 - This setup uses a LiteLLM service at the UCSB DREAM Lab that is restricted to
   library staff, but you could theoretically customize the scripts to use any
   LLM API.
-- To protect confidential interviews and secret API keys, add these lines to
-  your .gitignore:
+- **To protect confidential interviews and secret API keys, add these lines to
+  your .gitignore:**
 
 ```bash
 data/
