@@ -102,18 +102,20 @@ uv sync
 source .venv/bin/activate
 ```
 
-2. Prepare environment variables: in .env, write in the following, substituting your own variables:
+2. Prepare environment variables.
 
+Create a file in the root directory (transcribe-interviews/) called .env.
+In this file, write in the following, substituting your own variables:
 ```bash
 DATA_DIR=my_data_dir
 DATA_SUBDIR=my_interview_subdir
 WHISPER_TEST_MODEL=tiny
 WHISPER_PROD_MODEL=large-v3-turbo
 HF_TOKEN=my_HF_token
-LITELLM_API_KEY=my_litellm_key
-LITELLM_API_BASE=https://litellm.dreamlab.ucsb.edu
-LITELLM_TEST_MODEL=litellm_proxy/gemini-3-flash-preview
-LITELLM_PROD_MODEL=litellm_proxy/gemini-3.1-pro-preview-customtools
+LLM_API_KEY=my_litellm_key
+LLM_API_BASE=https://litellm.dreamlab.ucsb.edu
+LLM_TEST_MODEL=litellm_proxy/gemini-3-flash-preview
+LLM_PROD_MODEL=litellm_proxy/gemini-3.1-pro-preview-customtools
 ```
 
 If you want to test the pipeline, you can use these variables:
