@@ -3,19 +3,14 @@
 This project takes a Zoom recording and generates a higher-quality transcript
 than the one provided by Zoom itself. It uses a Whisper model for transcription
 and adds in speaker diarization with pyannote. The final transcript is the
-result of merging and cleaning up these outputs using a large language model via
-LiteLLM.
+result of merging and cleaning up these outputs using a large language model.
 
-It's pretty fragile at the moment, in that I don't have robust capabilities to
-resume the process if it's interrupted, and it's dependent on LiteLLM as your
-API gateway. This pipeline is a very bespoke thing made for my immediate
+This pipeline is a very bespoke thing made for my immediate
 purposes, but I'm slowly working to make it more generically useful.
 
 ## Important notes
 
-- This setup uses a LiteLLM service at the UCSB DREAM Lab that is restricted to
-  library staff, but you could theoretically customize the scripts to use any
-  LLM API.
+- WORK IN PROGRESS: I am switching over from using LiteLLM to using Opencode as my interface for interacting with LLMs.
 - **To protect confidential interviews and secret API keys, add these lines to
   your .gitignore:**
 
@@ -92,8 +87,17 @@ These examples used lower-quality models than I would use in a real production r
 
 ## Setup Instructions
 
+0. (Run once) Clone the repo and build the virtual environment.
+
+[Clone the GitHub repo.](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
+
+To build the virtual environment, run:
+```bash
+uv sync
+```
+
 1. Activate the virtual environment.
-åç
+
 ```bash
 source .venv/bin/activate
 ```
