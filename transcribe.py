@@ -3,12 +3,12 @@
 This script transcribes audio from MP4 files using the Whisper
 model by OpenAI. It processes audio chunks of an interview
 recording and generates time-stamped transcripts.
-Run like so:
-./transcribe.py my_data_subdirectory
+Make sure your environment variables in .env are up-to-date.
 """
 
 import os
 import time
+import argparse
 from pathlib import Path
 from dotenv import load_dotenv
 import whisper
@@ -17,11 +17,21 @@ import utils
 # Start the clock - we'll report how long the script took to run
 start_time = time.perf_counter()
 
+# Parse command line args
+parser = argparse.ArgumentParser(description="Transcribe audio chunks.")
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument('-t', '--test', action='store_true', help="Use the test model (WHISPER_TEST_MODEL)")
+group.add_argument('-p', '--prod', action='store_true', help="Use the production model (WHISPER_PROD_MODEL)")
+args = parser.parse_args()
+
 # Get env variables
 load_dotenv()
 DATA_DIR = os.getenv("DATA_DIR")
 DATA_SUBDIR = os.getenv("DATA_SUBDIR")
-WHISPER_MODEL = os.getenv("WHISPER_MODEL")
+WHISPER_TEST_MODEL = os.getenv("WHISPER_TEST_MODEL")
+WHISPER_PROD_MODEL = os.getenv("WHISPER_PROD_MODEL")
+WHISPER_MODEL = WHISPER_TEST_MODEL if args.test else WHISPER_PROD_MODEL
+
 # Model options: tiny, base, small, medium, large-v3-turbo
 # I use tiny or base for testing and large-v3-turbo for production
 model = whisper.load_model(WHISPER_MODEL)

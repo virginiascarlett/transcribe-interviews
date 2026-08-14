@@ -5,13 +5,13 @@ than the one provided by Zoom itself. It uses a Whisper model for transcription
 and adds in speaker diarization with pyannote. The final transcript is the
 result of merging and cleaning up these outputs using a large language model.
 
-This pipeline is a very bespoke thing made for my immediate
-purposes, but I'm slowly working to make it more generically useful.
+This pipeline is a very bespoke thing made for my immediate purposes, but I'm
+slowly working to make it more generically useful.
 
-## Important notes
+## VERY IMPORTANT notes
 
-- WORK IN PROGRESS: I am switching over from using LiteLLM to using Opencode as my interface for interacting with LLMs.
-- **To protect confidential interviews and secret API keys, add these lines to
+- WORK IN PROGRESS: I am switching over from using LiteLLM to a more generic interface for interacting with LLMs. The code is a bit broken right now as a result!
+- **⚠️IMPORTANT⚠️: To protect confidential interviews and secret API keys, add these lines to
   your .gitignore:**
 
 ```bash
@@ -26,6 +26,7 @@ data/
      is more accurate than Zoom's default output.
 
 Example:
+
 ```
 [0.00s - 7.12s] You're listening to the holistic spaces podcast brought to you by mindful design functray school episode 3-73
 [8.16s - 10.16s] Celebrate spring equinox
@@ -41,6 +42,7 @@ Example:
      SPEAKER_01), but no transcript.
 
 Example:
+
 ```
 [0.0s - 7.4s] SPEAKER_00
 [8.2s - 10.5s] SPEAKER_00
@@ -56,23 +58,25 @@ Example:
 [218.2s - 233.1s] SPEAKER_00
 ```
 
-
 3. Merge and clean
    - An LLM merges the time-stamped transcript with the time-stamped speaker
      labels to produce a complete transcript.
 
 Example:
+
 ```
 SPEAKER_00: You're listening to the holistic spaces podcast brought to you by mindful design functray school ...
 SPEAKER_01: Yeah and this is often where has been historically ancient civilizations have used this tracking the sun's movements...
 SPEAKER_00: Yeah so we'll go over these three different ways and hopefully you'll be inspired to incorporate ...
 ```
-   - After merging, the transcript undergoes two clean-up steps (again relying
-     on LLMs):
-     - `cleanup.py` reformats the text for easier readability.
-     - `final_cleanup.py` removes filler words and corrects minor typos.
+
+- After merging, the transcript undergoes two clean-up steps (again relying on
+  LLMs):
+  - `cleanup.py` reformats the text for easier readability.
+  - `final_cleanup.py` removes filler words and corrects minor typos.
 
 Example of final output:
+
 ```
 SPEAKER 00: You're listening to the Holistic Spaces Podcast brought to you by Mindful Design Feng Shui School, Episode 373: Celebrate Spring Equinox...
 
@@ -82,8 +86,10 @@ SPEAKER 00: Yes, we'll go over these three different ways, and hopefully you'll 
 
 ```
 
-These examples used lower-quality models than I would use in a real production run, and they are still cleaner than the .vtt file you get from Zoom. This pipeline does not suffer from the "context rot" problem you're likely to encounter if you try to clean up transcripts using a chatbot.
-
+These examples used lower-quality models than I would use in a real production
+run, and they are still cleaner than the .vtt file you get from Zoom. This
+pipeline does not suffer from the "context rot" problem you're likely to
+encounter if you try to clean up transcripts using a chatbot.
 
 ## Setup Instructions
 
@@ -92,6 +98,7 @@ These examples used lower-quality models than I would use in a real production r
 [Clone the GitHub repo.](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 
 To build the virtual environment, run:
+
 ```bash
 uv sync
 ```
@@ -104,37 +111,33 @@ source .venv/bin/activate
 
 2. Prepare environment variables.
 
-Create a file in the root directory (transcribe-interviews/) called .env.
-In this file, write in the following, substituting your own variables:
+Create a file in the root directory (transcribe-interviews/) called .env. In
+this file, write in the following, substituting your own variables: (don't
+include the comments)
+
 ```bash
-DATA_DIR=my_data_dir
-DATA_SUBDIR=my_interview_subdir
-WHISPER_TEST_MODEL=tiny
-WHISPER_PROD_MODEL=large-v3-turbo
-HF_TOKEN=my_HF_token
-LLM_API_KEY=my_litellm_key
-LLM_API_BASE=https://litellm.dreamlab.ucsb.edu
-LLM_TEST_MODEL=litellm_proxy/gemini-3-flash-preview
-LLM_PROD_MODEL=litellm_proxy/gemini-3.1-pro-preview-customtools
+DATA_DIR=my_data_dir # where all the data live; ADD TO .gitignore!!!
+DATA_SUBDIR=my_interview_subdir # which interview you want to process
+WHISPER_TEST_MODEL=tiny # model for testing transcription
+WHISPER_PROD_MODEL=large-v3-turbo # model for final transcription
+HF_TOKEN=my_HF_token # Follow the instructions here: https://github.com/pyannote/pyannote-audio You need to sign some forms on hugging face to get a free token
+LLM_API_KEY=my_llm_key # API key to your AI gateway
+LLM_API_BASE=https://myurl.com # base URL for your AI gateway
+LLM_TEST_MODEL=claude-v4.5-haiku
+LLM_PROD_MODEL=claude-v4.6-sonnet
 ```
 
 If you want to test the pipeline, you can use these variables:
 
 ```bash
 DATA_DIR=dummy_data
-DATA_SUBDIR=conversation1
+DATA_SUBDIR=may_eq
 ```
 
-I use the 'tiny' Whisper model for testing and 'large-v3-turbo' for production.
-Pyannote requires that you sign some forms on hugging face in order to get a
-token to use it--that's where the HF token comes from.
+3. Run the pipeline.
 
-The LiteLLM "API Gateway" for UCSB Library staff give us access to
-"gemini-3-flash-preview", "gemini-3.1-pro-preview", or
-"gemini-3.1-pro-preview-customtools". Flash is cheaper, pro is smarter.
-
-3. Place the Zoom `.mp4` recording into a new subdirectory under `data/`. Here,
-   I call it `my_interview_subdir/`. Make sure this name is in the .env file.
+Place the Zoom `.mp4` recording into a new subdirectory under `data/`. Here, I
+call it `my_interview_subdir/`. Make sure this name is in the .env file, above.
 
 Next, you can either run the whole pipeline all at once like so:
 
@@ -159,9 +162,9 @@ correct step if you've already completed a portion of the pipeline.
      transcription with no speaker IDs:
 
      ```bash
-     ./transcribe.py
+     ./transcribe.py -t
      ```
-
+     Use -t or --test to run in test mode with a your testing model, and -p or --prod to run in production mode with your production model.
      This takes about 5 minutes for a one-hour interview.
 
    - Run these two commands to generate diarized timestamps with no transcript:
