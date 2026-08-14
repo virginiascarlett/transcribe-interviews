@@ -10,28 +10,33 @@ slowly working to make it more generically useful.
 
 ## VERY IMPORTANT notes
 
-- WORK IN PROGRESS: I am switching over from using LiteLLM to a more generic interface for interacting with LLMs. The code is a bit broken right now as a result!
-- **⚠️IMPORTANT⚠️: To protect confidential interviews and secret API keys, add these lines to
-  your .gitignore:**
+- **⚠️IMPORTANT⚠️: To protect confidential interviews and secret API keys, add
+  these lines to your .gitignore:**
 
 ```bash
 data/
 .env
 ```
 
+- You'll have to configure your own LLM provider. Currently, the pipeline
+  accepts two: OpenAI and LiteLLM. The choice of provider just dictates the
+  syntax of the functions used to submit your request to the LLM, so your API
+  just needs to be compatible with one of those two.
+
 ## How It Works
 
 1. Transcription with Whisper AI
-   - Transcribes the Zoom audio (MP4) to produce a timestamped transcript that
-     is more accurate than Zoom's default output.
+   - Transcribes your recording to produce a timestamped transcript that is more
+     accurate than Zoom's default output. (It will take any mp4.)
 
 Example:
 
 ```
-[0.00s - 7.12s] You're listening to the holistic spaces podcast brought to you by mindful design functray school episode 3-73
-[8.16s - 10.16s] Celebrate spring equinox
-[11.36s - 16.80s] Welcome to episode 3-73 of the holistic spaces podcast where we hope to inspire
-[16.80s - 21.44s] educate and empower you to create your own holistic spaces that nurture and resonate with you.
+[0.00s - 3.80s] We wanted to share five ways to reflect and align with this
+[3.80s - 5.80s] Qi, the life force energy of May.
+[5.80s - 10.30s] So think of it as a time to embrace expansion and growth.
+[10.30s - 15.80s] May has that rising fire Qi and that's going to support this idea of
+[15.80s - 19.40s] expansion and spreading out and exploring and venturing.
 ```
 
 2. Speaker diarization with pyannote
@@ -44,18 +49,11 @@ Example:
 Example:
 
 ```
-[0.0s - 7.4s] SPEAKER_00
-[8.2s - 10.5s] SPEAKER_00
-[11.5s - 21.6s] SPEAKER_00
-[22.2s - 27.6s] SPEAKER_00
-.
-.
-.
-[143.6s - 153.5s] SPEAKER_01
-[153.9s - 173.1s] SPEAKER_01
-[173.7s - 197.6s] SPEAKER_01
-[198.4s - 218.1s] SPEAKER_00
-[218.2s - 233.1s] SPEAKER_00
+[0.0s - 6.0s] SPEAKER_00
+[6.0s - 32.0s] SPEAKER_01
+[32.0s - 52.8s] SPEAKER_00
+[53.1s - 71.0s] SPEAKER_01
+[71.2s - 85.4s] SPEAKER_01
 ```
 
 3. Merge and clean
@@ -65,24 +63,24 @@ Example:
 Example:
 
 ```
-SPEAKER_00: You're listening to the holistic spaces podcast brought to you by mindful design functray school ...
-SPEAKER_01: Yeah and this is often where has been historically ancient civilizations have used this tracking the sun's movements...
-SPEAKER_00: Yeah so we'll go over these three different ways and hopefully you'll be inspired to incorporate ...
+SPEAKER_00: We wanted to share five ways to reflect and align with this Qi, the life force energy of May.
+SPEAKER_01: So think of it as a time to embrace expansion and growth. May has that rising fire Qi and that's going to support this idea of expansion and spreading out and exploring and venturing. This is a time to act on ideas, nurture maybe what you've started in the spring time, allow your energy to gain clarity and strength just beyond those early spring beginnings.
+SPEAKER_00: Another way that you can reflect and align with the Qi, if May is to invite joy into everyday life. So joy and passion are emotions associated with the fire element.
 ```
 
 - After merging, the transcript undergoes two clean-up steps (again relying on
   LLMs):
-  - `cleanup.py` reformats the text for easier readability.
-  - `final_cleanup.py` removes filler words and corrects minor typos.
+  - `cleanup_step1.py` reformats the text for easier readability.
+  - `cleanup_step2.py` removes filler words and corrects minor typos.
 
 Example of final output:
 
 ```
-SPEAKER 00: You're listening to the Holistic Spaces Podcast brought to you by Mindful Design Feng Shui School, Episode 373: Celebrate Spring Equinox...
+SPEAKER_00: We wanted to share five ways to reflect and align with this Qi, the life force energy of May.
 
-SPEAKER 01: Yes, and historically, ancient civilizations have used tracking the sun's movements as a way to...
+SPEAKER_01: Think of it as a time to embrace expansion and growth. May has that rising fire Qi and that is going to support this idea of expansion, spreading out, exploring, and venturing. This is a time to act on ideas, nurture what you have started in the springtime, and allow your energy to gain clarity and strength just beyond those early spring beginnings.
 
-SPEAKER 00: Yes, we'll go over these three different ways, and hopefully you'll be inspired to...
+SPEAKER_00: Another way that you can reflect and align with the Qi of May is to invite joy into everyday life. Joy and passion are emotions associated with the fire element.
 
 ```
 
@@ -109,7 +107,7 @@ uv sync
 source .venv/bin/activate
 ```
 
-2. Prepare environment variables.
+2. Prepare environment variables and directory structure.
 
 Create a file in the root directory (transcribe-interviews/) called .env. In
 this file, write in the following, substituting your own variables: (don't
@@ -121,63 +119,93 @@ DATA_SUBDIR=my_interview_subdir # which interview you want to process
 WHISPER_TEST_MODEL=tiny # model for testing transcription
 WHISPER_PROD_MODEL=large-v3-turbo # model for final transcription
 HF_TOKEN=my_HF_token # Follow the instructions here: https://github.com/pyannote/pyannote-audio You need to sign some forms on hugging face to get a free token
-LLM_API_KEY=my_llm_key # API key to your AI gateway
-LLM_API_BASE=https://myurl.com # base URL for your AI gateway
-LLM_TEST_MODEL=claude-v4.5-haiku
-LLM_PROD_MODEL=claude-v4.6-sonnet
+LITELLM_API_KEY=01234568abcdefg
+LITELLM_API_BASE=https://example.com
+LITELLM_TEST_MODEL=gemini-3.1-flash-lite
+LITELLM_PROD_MODEL=gemini-3.1-pro-preview-customtools
+OPENAI_API_KEY=01234568abcdefg
+OPENAI_API_BASE=https://example.com
+OPENAI_TEST_MODEL=claude-v4.5-haiku
+OPENAI_PROD_MODEL=claude-v4.6-sonnet
 ```
 
-If you want to test the pipeline, you can use these variables:
+Obviously, you don't need to include for credentials for OpenAI if you'll only
+be using LiteLLM, and vice versa.
+
+You can test that your connection to your provider is working by executing the
+corresponding module as a script, e.g. ./my_litellm.py.
+
+If you want to test the whole pipeline, you can use these variables:
 
 ```bash
 DATA_DIR=dummy_data
 DATA_SUBDIR=may_eq
 ```
 
-3. Run the pipeline.
+That will point the pipeline to the included sample recording.
 
-Place the Zoom `.mp4` recording into a new subdirectory under `data/`. Here, I
-call it `my_interview_subdir/`. Make sure this name is in the .env file, above.
+When you're ready to use real data, create a directory called `data/` (make sure
+this is in `.gitignore` if the data are confidential!). In that directory,
+create a subdirectory for the recording you want to process. Put your mp4
+recording from Zoom in that subdirectory. **Rename the recording to
+'recording.mp4'.**
 
-Next, you can either run the whole pipeline all at once like so:
+3. Run the pipeline. **🛑 JK THIS SHELL SCRIPT IS CURRENTLY BROKEN, WILL FIX
+   ASAP** Place the Zoom `.mp4` recording into a new subdirectory under `data/`.
+   Here, I call it `my_interview_subdir/`. Make sure this name is in the .env
+   file, above.
+
+Next, you can run the whole pipeline all at once like so:
 
 ```bash
 ./run_pipeline.sh
 ```
 
-Or you can proceed with the step-by-step procedure below. N.B. The above shell
-script has not been rigorously tested. In theory, it SHOULD resume at the
-correct step if you've already completed a portion of the pipeline.
+N.B. this script has not been rigorously tested. In theory, it SHOULD resume at
+the correct step if you've already completed a portion of the pipeline.
 
-4. Rename the recording to `recording.mp4`.
+**All the following steps are optional. They show how to run the pipeline
+manually, step by step.**
 
-5. Run the following to split the file into several smaller files:
+4. Run the following to split the file into several smaller files:
 
 ```bash
 ./split_recording.sh
 ```
 
-6. The next two steps can be performed in any order:
+5. The next two steps can be performed in any order:
    - Run `transcribe.py` on the subdirectory to produce a timestamped
      transcription with no speaker IDs:
 
      ```bash
      ./transcribe.py -t
      ```
-     Use -t or --test to run in test mode with a your testing model, and -p or --prod to run in production mode with your production model.
-     This takes about 5 minutes for a one-hour interview.
+
+     Use -t or --test to run in test mode with a your testing model, and -p or
+     --prod to run in production mode with your production model. This step
+     takes about 5 minutes for a one-hour interview.
 
    - Run these two commands to generate diarized timestamps with no transcript:
      ```bash
      ./convert_to_wav.sh
-     ./diarize.py
+     ./diarize.py -t
      ```
-     diarize.py takes about 30 minutes for a 1-hour interview.
+     This step is SLOW. 🐌 I find that the required time is about half of the
+     recording length. So diarize.py takes about 30 minutes for a 1-hour
+     interview.
 
-7. Run `./merge.py` to align the two transcripts. This step takes about 15
-   minutes for a 1-hour interview.
+6. Run `./merge.py` to align the two transcripts. Example:
 
-8. Clean up the output in two steps:
-   - `./cleanup.py` – reformats for better readability.
-   - `./final_cleanup.py` – uses AI to remove filler words and correct minor
-     typos.
+```bash
+./merge.py -t --provider litellm
+```
+
+You must specify the provider, openai or litellm. This step takes about 15
+minutes for a 1-hour interview.
+
+7. Clean up the output in two steps:
+   - `./cleanup_step1.py` – reformats for better readability.
+   - `./cleanup_step2.py` – removes filler words and correct minor typos.
+
+Again, specify test/prod and openai/litellmfor these, as above. Run with the -h flag, e.g.
+`./cleanup_step1.py -h` to see the menu of options.

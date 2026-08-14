@@ -169,7 +169,7 @@ fi
 
 log "=== Step 5: Clean up (cleanup.py) ==="
 
-clean_count=$(count_files "${SUBDIR}/diarized_transcripts_clean" "chunk*.txt")
+clean_count=$(count_files "${SUBDIR}/diarized_transcripts_somewhat_clean" "chunk*.txt")
 
 if [[ "$clean_count" -ge "$chunk_count" ]]; then
     skip "Found $clean_count cleaned file(s) for $chunk_count chunk(s). Skipping cleanup."
