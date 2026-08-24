@@ -151,9 +151,10 @@ recording from Zoom in that subdirectory. **Rename the recording to
 'recording.mp4'.**
 
 3. Run the pipeline. **🛑 JK THIS SHELL SCRIPT IS CURRENTLY BROKEN, WILL FIX
-   ASAP** Place the Zoom `.mp4` recording into a new subdirectory under `data/`.
-   Here, I call it `my_interview_subdir/`. Make sure this name is in the .env
-   file, above.
+   ASAP**
+
+Place the Zoom `.mp4` recording into a new subdirectory under `data/`. Here, I
+call it `my_interview_subdir/`. Make sure this name is in the .env file, above.
 
 Next, you can run the whole pipeline all at once like so:
 
@@ -207,5 +208,5 @@ minutes for a 1-hour interview.
    - `./cleanup_step1.py` – reformats for better readability.
    - `./cleanup_step2.py` – removes filler words and correct minor typos.
 
-Again, specify test/prod and openai/litellmfor these, as above. Run with the -h flag, e.g.
-`./cleanup_step1.py -h` to see the menu of options.
+Again, specify test/prod and openai/litellmfor these, as above. Run with the -h
+flag, e.g. `./cleanup_step1.py -h` to see the menu of options.
