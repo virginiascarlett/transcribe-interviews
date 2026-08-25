@@ -8,13 +8,11 @@ set +a
 # Validate command-line argument
 if [ -z "$1" ]; then
     echo "Error: Please provide a recording name as an argument." >&2
-    echo "Usage: ./split_recording.sh <recording_name>" >&2
+    echo "Usage: $0 <recording_name>" >&2
     exit 1
 fi
 
-# Strip .mp4 extension if present
 RECORDING_NAME="$1"
-RECORDING_NAME="${RECORDING_NAME%.mp4}"
 
 # Validate that the input MP4 file exists
 INPUT_FILE="$DATA_DIR/$RECORDING_NAME.mp4"

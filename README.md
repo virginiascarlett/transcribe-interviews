@@ -21,7 +21,9 @@ data/
 - You'll have to configure your own LLM provider. Currently, the pipeline
   accepts two: OpenAI and LiteLLM. The choice of provider just dictates the
   syntax of the functions used to submit your request to the LLM, so your API
-  just needs to be compatible with one of those two.
+  just needs to be compatible with one of those two. Or if you want to use
+  something else, you can write a new module in the style of my existing modules
+  my_litellm.py and my_openai.py.
 
 ## How It Works
 
@@ -68,10 +70,7 @@ SPEAKER_01: So think of it as a time to embrace expansion and growth. May has th
 SPEAKER_00: Another way that you can reflect and align with the Qi, if May is to invite joy into everyday life. So joy and passion are emotions associated with the fire element.
 ```
 
-- After merging, the transcript undergoes two clean-up steps (again relying on
-  LLMs):
-  - `cleanup_step1.py` reformats the text for easier readability.
-  - `cleanup_step2.py` removes filler words and corrects minor typos.
+- After merging, the transcript undergoes two clean-up steps that improve the readability of the transcript.
 
 Example of final output:
 
@@ -115,7 +114,6 @@ include the comments)
 
 ```bash
 DATA_DIR=my_data_dir # where all the data live; ADD TO .gitignore!!!
-DATA_SUBDIR=my_interview_subdir # which interview you want to process
 WHISPER_TEST_MODEL=tiny # model for testing transcription
 WHISPER_PROD_MODEL=large-v3-turbo # model for final transcription
 HF_TOKEN=my_HF_token # Follow the instructions here: https://github.com/pyannote/pyannote-audio You need to sign some forms on hugging face to get a free token
@@ -125,7 +123,7 @@ LITELLM_TEST_MODEL=gemini-3.1-flash-lite
 LITELLM_PROD_MODEL=gemini-3.1-pro-preview-customtools
 OPENAI_API_KEY=01234568abcdefg
 OPENAI_API_BASE=https://example.com
-OPENAI_TEST_MODEL=claude-v4.5-haiku
+OPENAI_TEST_MODEL=amazon-nova-pro
 OPENAI_PROD_MODEL=claude-v4.6-sonnet
 ```
 
@@ -135,78 +133,38 @@ be using LiteLLM, and vice versa.
 You can test that your connection to your provider is working by executing the
 corresponding module as a script, e.g. ./my_litellm.py.
 
-If you want to test the whole pipeline, you can use these variables:
+If you want to test the whole pipeline with the provided dummy data, you can use
+this variable:
 
 ```bash
 DATA_DIR=dummy_data
-DATA_SUBDIR=may_eq
 ```
 
-That will point the pipeline to the included sample recording.
+And execute the pipeline with this command, from the project root directory:
+
+```bash
+./run_pipeline.py --test --name may_qi --provider litellm
+```
 
 When you're ready to use real data, create a directory called `data/` (make sure
-this is in `.gitignore` if the data are confidential!). In that directory,
-create a subdirectory for the recording you want to process. Put your mp4
-recording from Zoom in that subdirectory. **Rename the recording to
-'recording.mp4'.**
+this is in `.gitignore` if the data are confidential!!!). Put your mp4 recording
+from Zoom in that subdirectory.
 
-3. Run the pipeline. **🛑 JK THIS SHELL SCRIPT IS CURRENTLY BROKEN, WILL FIX
-   ASAP**
+Here are the arguments:
 
-Place the Zoom `.mp4` recording into a new subdirectory under `data/`. Here, I
-call it `my_interview_subdir/`. Make sure this name is in the .env file, above.
+- `-t`/`-p` or `--test`/`--prod`: you MUST include one of these to indicate
+  whether to use the test or production models configured in your .env file.
+- `--name`: the name of the recording. Must match the basename of the mp4 file.
+  So if your recording is called interview_with_joe.mp4, use
+  `--name interview_with_joe`.
+- `--provider`: one of either litellm or openai, as described above.
 
-Next, you can run the whole pipeline all at once like so:
+This pipeline is SLOW. 🐌 Expect it to take at least half the length of the
+recording, so for a 1-hour interview expect it to take at least half an hour.
+I just haven't had the time to make the necessary performance upgrades.
 
-```bash
-./run_pipeline.sh
-```
-
-N.B. this script has not been rigorously tested. In theory, it SHOULD resume at
-the correct step if you've already completed a portion of the pipeline.
-
-**All the following steps are optional. They show how to run the pipeline
-manually, step by step.**
-
-4. Run the following to split the file into several smaller files:
-
-```bash
-./split_recording.sh
-```
-
-5. The next two steps can be performed in any order:
-   - Run `transcribe.py` on the subdirectory to produce a timestamped
-     transcription with no speaker IDs:
-
-     ```bash
-     ./transcribe.py -t
-     ```
-
-     Use -t or --test to run in test mode with a your testing model, and -p or
-     --prod to run in production mode with your production model. This step
-     takes about 5 minutes for a one-hour interview.
-
-   - Run these two commands to generate diarized timestamps with no transcript:
-     ```bash
-     ./convert_to_wav.sh
-     ./diarize.py -t
-     ```
-     This step is SLOW. 🐌 I find that the required time is about half of the
-     recording length. So diarize.py takes about 30 minutes for a 1-hour
-     interview.
-
-6. Run `./merge.py` to align the two transcripts. Example:
-
-```bash
-./merge.py -t --provider litellm
-```
-
-You must specify the provider, openai or litellm. This step takes about 15
-minutes for a 1-hour interview.
-
-7. Clean up the output in two steps:
-   - `./cleanup_step1.py` – reformats for better readability.
-   - `./cleanup_step2.py` – removes filler words and correct minor typos.
-
-Again, specify test/prod and openai/litellmfor these, as above. Run with the -h
-flag, e.g. `./cleanup_step1.py -h` to see the menu of options.
+The pipeline produces a hidden file with temporary files and folders, named
+`.tmp_<recording_name>`. Delete this at the end of the run if you are happy with the
+final transcript. I plan to refactor the code so that it will resume at the last
+complete file if the pipeline is interrupted, but this functionality is not here
+yet.

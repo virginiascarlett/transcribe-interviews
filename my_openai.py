@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 
 # Get env variables
 load_dotenv()
-DATA_DIR = os.getenv("DATA_DIR")
-DATA_SUBDIR = os.getenv("DATA_SUBDIR")
 LLM_API_KEY = os.getenv("OPENAI_API_KEY")
 LLM_API_BASE = os.getenv("OPENAI_API_BASE")
 LLM_TEST_MODEL = os.getenv("OPENAI_API_TEST_MODEL")

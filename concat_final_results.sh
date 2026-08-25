@@ -7,4 +7,27 @@ set -a
 source .env
 set +a
 
-for f in $DATA_DIR/$DATA_SUBDIR/diarized_transcripts_clean_final/final*.txt; do cat "$f"; echo "\n"; done > $DATA_DIR/$DATA_SUBDIR/final_transcript.txt
+# Validate command-line argument
+if [ -z "$1" ]; then
+    echo "Error: Please provide a recording name as an argument." >&2
+    echo "Usage: $0 <recording_name>" >&2
+    exit 1
+fi
+
+RECORDING_NAME="$1"
+
+# Validate that the input transcripts exist
+TMP_DIR="$DATA_DIR/.tmp_${RECORDING_NAME}"
+
+INPUT_FILE="$TMP_DIR/merged_clean0.txt"
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: Input file not found: $INPUT_FILE" >&2
+    exit 1
+fi
+
+for file in "$TMP_DIR"/merged_clean*.txt; do
+    # Extract filename without extension for the output
+    filename=$(basename "$file" .txt)
+    cat "$file"
+    echo
+done > "$DATA_DIR/${RECORDING_NAME}_final_transcript.txt"

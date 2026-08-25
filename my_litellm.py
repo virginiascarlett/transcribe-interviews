@@ -5,13 +5,11 @@ from dotenv import load_dotenv
 
 # Get env variables
 load_dotenv()
-DATA_DIR = os.getenv("DATA_DIR")
-DATA_SUBDIR = os.getenv("DATA_SUBDIR")
 LITELLM_API_KEY = os.getenv("LITELLM_API_KEY")
 LITELLM_API_BASE = os.getenv("LITELLM_API_BASE")
 LITELLM_TEST_MODEL = os.getenv("LITELLM_TEST_MODEL")
 
-def query_LLM(instructions: str, user_data: str, model: str = "claude-v4.6-sonnet") -> str:
+def query_LLM(instructions: str, user_data: str, model: str = "gemini-3-flash-preview") -> str:
     """
     Sends a structured prompt to liteLLM.
 

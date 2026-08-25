@@ -4,7 +4,9 @@
 # Usage: ./convert_to_wav.sh <recording_name>
 # Example: ./convert_to_wav.sh my_interview
 
-if [ $# -ne 1 ]; then
+# Validate command-line argument
+if [ -z "$1" ]; then
+    echo "Error: Please provide a recording name as an argument." >&2
     echo "Usage: $0 <recording_name>" >&2
     exit 1
 fi
