@@ -1,19 +1,29 @@
 #!/bin/bash
 
 # Run this script to convert mp4 files from Zoom to .wav for pyannote.
+# Usage: ./convert_to_wav.sh <recording_name>
+# Example: ./convert_to_wav.sh my_interview
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <recording_name>" >&2
+    exit 1
+fi
+
+RECORDING_NAME="$1"
 
 # Load env variables
 set -a
 source .env
 set +a
 
-LOG_FILE="$DATA_DIR/$DATA_SUBDIR/convert_to_wav.log"
+TMP_DIR="$DATA_DIR/.tmp_${RECORDING_NAME}"
+LOG_FILE="$TMP_DIR/convert_to_wav.log"
 errors=0
 
-for file in "$DATA_DIR"/$DATA_SUBDIR/chunk*.mp4; do
+for file in "$TMP_DIR"/chunk*.mp4; do
     # Extract filename without extension for the output
     filename=$(basename "$file" .mp4)
-    ffmpeg -i "$file" "$DATA_DIR/$DATA_SUBDIR/${filename}.wav" >> "$LOG_FILE" 2>&1
+    ffmpeg -i "$file" "$TMP_DIR/${filename}.wav" >> "$LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
         errors=$((errors + 1))
     fi

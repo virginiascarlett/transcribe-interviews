@@ -44,8 +44,12 @@ def run_func_w_progbar(func, input_files, output_path=None, output_subdir=None, 
     return results_list
 
 def get_out_file_path(path_w_subdir, sub_subdir, basename, index, extension):
-    """Constructs the full path to an output file, e.g. dummy_data/conversation1/transcripts/transcript0/txt."""
-    out_dir = path_w_subdir / sub_subdir
+    """Constructs the full path to an output file, e.g. dummy_data/conversation1/transcripts/transcript0/txt.
+    If sub_subdir is None, saves directly to path_w_subdir."""
+    if sub_subdir is None:
+        out_dir = path_w_subdir
+    else:
+        out_dir = path_w_subdir / sub_subdir
     out_file = out_dir / f"{basename}{index}.{extension}"
     # parents=True creates any missing parent directories in the path
     # exist_ok=True means don't overwrite the folder if it's already there
