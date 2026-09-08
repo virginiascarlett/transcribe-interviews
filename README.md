@@ -1,5 +1,7 @@
 # Zoom Interview Transcript Generator
 
+![Project Status: Experimental](https://img.shields.io/badge/status-completed-green)
+
 This project takes a Zoom recording and generates a higher-quality transcript
 than the one provided by Zoom itself. It uses a Whisper model for transcription
 and adds in speaker diarization with pyannote. The final transcript is the
