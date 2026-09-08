@@ -1,6 +1,6 @@
 # Zoom Interview Transcript Generator
 
-![Project Status: Experimental](https://img.shields.io/badge/project_status-experimental-green)
+![Project Status: Experimental](https://img.shields.io/badge/project_status-experimental-orange)
 
 This project takes a Zoom recording and generates a higher-quality transcript
 than the one provided by Zoom itself. It uses a Whisper model for transcription
