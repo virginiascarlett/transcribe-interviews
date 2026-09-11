@@ -13,23 +13,13 @@ import time
 from pathlib import Path
 from dotenv import load_dotenv
 import utils
+from typing import Optional
 
 
 class Merger:
     """Handles merging of diarization and transcript data using an LLM."""
 
-    INSTRUCTIONS = """
-You have been given two artifacts from an interview excerpt: one is a transcript
-of what was said, and the other is a record of who spoke when. Please
-merge the two into one file using the timestamps provided.
-The result should be formatted as speaker: statement, without timestamps, like this:
-SPEAKER_00: Thanks for joining us today.
-SPEAKER_01: Sure, happy to be here.
-SPEAKER_00: To get started, tell me about your role in this project.
-Do not edit the statements from the transcript.
-"""
-
-    def __init__(self, llm_model: str, data_dir: str, query_llm_func):
+    def __init__(self, llm_model: str, data_dir: str, query_llm_func, num_interviewers: Optional[int] = None, num_interviewees: Optional[int] = None):
         """
         Initialize the Merger.
 
@@ -37,10 +27,36 @@ Do not edit the statements from the transcript.
             llm_model: Name of the LLM model to use
             data_dir: Base directory for data operations
             query_llm_func: Function to query the LLM (from my_openai or my_litellm)
+            num_interviewers: optional command line arg to specify number of interviewers
+            num_interviewees: optional command line arg to specify number of people being interviewed
         """
         self.llm_model = llm_model
         self.data_dir = data_dir
         self.query_llm_func = query_llm_func
+        self.num_interviewers = num_interviewers
+        self.num_interviewees = num_interviewees
+
+    def build_prompt_instructions(self) -> str:
+        INSTRUCTIONS = """
+        You have been given two artifacts from an interview excerpt: one is a transcript
+        of what was said, and the other is a record of who spoke when. Please
+        merge the two into one file using the timestamps provided.
+        The result should be formatted as speaker: statement, without timestamps.
+        Infer from context who is an interviewer and who is being interviewed.
+        The speaker label should indicate which they are.
+        """
+        # Build dynamic constraints based on optional arguments
+        constraints = []
+        if self.num_interviewers is not None:
+            constraints.append(f"There is(are) {self.num_interviewers} distinct interviewer(s).")
+        if self.num_interviewees is not None:
+            constraints.append(f"There is(are) {self.num_interviewees} distinct interviewee(s).")
+
+        if constraints:
+            speaker_guidance = "\n\nSpeaker Constraints:\n- " + "\n- ".join(constraints)
+            return INSTRUCTIONS + speaker_guidance
+
+        return INSTRUCTIONS
 
     def merge_chunk(self, diarization_file: str, transcript_file: str) -> list:
         """
@@ -175,6 +191,18 @@ if __name__ == "__main__":
         required=True,
         help="The provider to use (must be either openai or litellm).",
     )
+    parser.add_argument(
+            "--num_interviewers",
+            type=int,
+            required=False,
+            help="Optional command line arg to specify number of interviewers",
+        )
+    parser.add_argument(
+            "--num_interviewees",
+            type=int,
+            required=False,
+            help="Optional command line arg to specify number of interviewees",
+        )
     args = parser.parse_args()
 
     # Load configuration
