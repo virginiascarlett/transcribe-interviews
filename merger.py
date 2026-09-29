@@ -79,17 +79,17 @@ class Merger:
 
         # Use xml tags to demarcate the start and end of each file
         user_data = f"""
-Please merge these two documents:
-<transcript>
-{transcript_text}
-</transcript>
+            Please merge these two documents:
+            <transcript>
+            {transcript_text}
+            </transcript>
 
-<diarization>
-{diarization_text}
-</diarization>
-"""
+            <diarization>
+            {diarization_text}
+            </diarization>
+            """
 
-        answer = self.query_llm_func(self.INSTRUCTIONS, user_data, model=self.llm_model)
+        answer = self.query_llm_func(self.build_prompt_instructions(), user_data, model=self.llm_model)
         if answer.startswith("Error:") or answer.startswith("An unexpected error"):
             chunk_num = "".join(filter(str.isdigit, str(diarization_file)))
             print(f"Error processing chunk {chunk_num}: {answer}")
