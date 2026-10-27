@@ -3,14 +3,14 @@
 Pipeline orchestrator for interview transcription and processing.
 
 This script coordinates the entire workflow:
-1. Splitting recording into chunks
-2. Transcribing chunks with Whisper
-3. Converting to WAV format for diarization
-4. Performing speaker diarization
-5. Merging transcription with speaker identification
-6. First-pass cleanup (remove redundant speaker labels)
-7. Final cleanup (grammar, punctuation, filler words)
-8. Concatenating final results
+1. Splitting recording into chunks (split)
+2. Transcribing chunks with Whisper (transcribe)
+3. Converting to WAV format for diarization (convert)
+4. Performing speaker diarization (diarize)
+5. Merging transcription with speaker identification (merge)
+6. First-pass cleanup (remove redundant speaker labels) (cleanup1)
+7. Final cleanup (grammar, punctuation, filler words) (cleanup2)
+8. Concatenating final results (concat)
 """
 
 import os
@@ -167,7 +167,13 @@ def step_merge(recording_name, args, merger_config):
     print(f"Merging transcript and diarization for {recording_name}...")
     merger_data_dir, merger_test_model, merger_prod_model, merger_query_llm = merger_config
     merger_model = merger_test_model if args.test else merger_prod_model
-    merger = Merger(llm_model=merger_model, data_dir=merger_data_dir, query_llm_func=merger_query_llm)
+    merger = Merger(
+        llm_model=merger_model,
+        data_dir=merger_data_dir,
+        query_llm_func=merger_query_llm,
+        num_interviewers=args.num_interviewers,
+        num_interviewees=args.num_interviewees,
+    )
     merger.merge_all(recording_name)
 
 
@@ -213,6 +219,18 @@ def run_pipeline():
         choices=["openai", "litellm"],
         required=True,
         help="The provider to use (must be either openai or litellm).",
+    )
+    parser.add_argument(
+        "--num_interviewers",
+        type=int,
+        required=False,
+        help="Optional command line arg to specify number of interviewers",
+    )
+    parser.add_argument(
+        "--num_interviewees",
+        type=int,
+        required=False,
+        help="Optional command line arg to specify number of interviewees",
     )
 
     # Step selection arguments (mutually exclusive)
